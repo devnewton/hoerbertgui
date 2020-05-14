@@ -4,6 +4,7 @@ import fr.devnewton.hoerbertgui.utils.FilesSelection;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
+import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -38,8 +39,6 @@ public class PlaylistPanel extends javax.swing.JPanel {
         jScrollPane1 = new javax.swing.JScrollPane();
         playlist = new javax.swing.JList<>();
         jPanel1 = new javax.swing.JPanel();
-        jButton1 = new javax.swing.JButton();
-        jButton3 = new javax.swing.JButton();
         filler1 = new javax.swing.Box.Filler(new java.awt.Dimension(0, 0), new java.awt.Dimension(0, 0), new java.awt.Dimension(32767, 0));
         jButton2 = new javax.swing.JButton();
 
@@ -47,18 +46,17 @@ public class PlaylistPanel extends javax.swing.JPanel {
 
         playlist.setDragEnabled(true);
         playlist.setDropMode(javax.swing.DropMode.INSERT);
+        playlist.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                playlistKeyReleased(evt);
+            }
+        });
         jScrollPane1.setViewportView(playlist);
 
         add(jScrollPane1);
 
         jPanel1.setMaximumSize(new java.awt.Dimension(32767, 0));
         jPanel1.setLayout(new javax.swing.BoxLayout(jPanel1, javax.swing.BoxLayout.LINE_AXIS));
-
-        jButton1.setText("Ajouter");
-        jPanel1.add(jButton1);
-
-        jButton3.setText("Retirer");
-        jPanel1.add(jButton3);
         jPanel1.add(filler1);
 
         jButton2.setText("Retour");
@@ -76,12 +74,16 @@ public class PlaylistPanel extends javax.swing.JPanel {
         this.setVisible(false);
     }//GEN-LAST:event_jButton2ActionPerformed
 
+    private void playlistKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_playlistKeyReleased
+       if(evt.getKeyCode() == KeyEvent.VK_DELETE || evt.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
+           this.playlist.clearSelection();
+       }
+    }//GEN-LAST:event_playlistKeyReleased
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.Box.Filler filler1;
-    private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
-    private javax.swing.JButton jButton3;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JList<File> playlist;
@@ -141,12 +143,12 @@ public class PlaylistPanel extends javax.swing.JPanel {
         });
     }
 
-    File[] getPlaylist() {
-        File[] playlist = new File[playlistModel.size()];
-        for(int i=0; i<playlist.length; ++i) {
-            playlist[i] = playlistModel.get(i);
+    File[] getPlaylistFiles() {
+        File[] playlistFiles = new File[playlistModel.size()];
+        for(int i=0; i<playlistFiles.length; ++i) {
+            playlistFiles[i] = playlistModel.get(i);
         }
-        return playlist;
+        return playlistFiles;
     }
 
 }

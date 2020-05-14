@@ -2,7 +2,13 @@ package fr.devnewton.hoerbertgui;
 
 import fr.devnewton.hoerbertgui.io.HoerbertIO;
 import java.awt.CardLayout;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.File;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JFileChooser;
 
 public class HoerbertApp extends javax.swing.JFrame {
 
@@ -11,6 +17,12 @@ public class HoerbertApp extends javax.swing.JFrame {
      */
     public HoerbertApp() {
         initComponents();
+        this.hoerbertIO.addPropertyChangeListener((PropertyChangeEvent evt) -> {
+            if(HoerbertIO.PROP_SDCARD.equals(evt.getPropertyName())) {
+                this.statusLabel.setText(null != evt.getNewValue() ? evt.getNewValue().toString() : "");
+            }
+        });
+        this.hoerbertIO.detectSdcard();
     }
 
     /**
@@ -22,6 +34,8 @@ public class HoerbertApp extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        sdcardFileChooser = new javax.swing.JFileChooser();
+        hoerbertIO = new fr.devnewton.hoerbertgui.io.HoerbertIO();
         mainPanel = new javax.swing.JPanel();
         buttonsPanel = new javax.swing.JPanel();
         violetButton = new javax.swing.JButton();
@@ -46,10 +60,12 @@ public class HoerbertApp extends javax.swing.JFrame {
         statusLabel = new javax.swing.JLabel();
         menuBar = new javax.swing.JMenuBar();
         fileMenu = new javax.swing.JMenu();
-        saveAsMenuItem = new javax.swing.JMenuItem();
+        selectSDCardMenuItem = new javax.swing.JMenuItem();
+        writeToSDCardMenuItem = new javax.swing.JMenuItem();
         exitMenuItem = new javax.swing.JMenuItem();
-        helpMenu = new javax.swing.JMenu();
-        aboutMenuItem = new javax.swing.JMenuItem();
+
+        sdcardFileChooser.setDialogTitle("Choisissez le dossier de la carte SD");
+        sdcardFileChooser.setFileSelectionMode(javax.swing.JFileChooser.DIRECTORIES_ONLY);
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         getContentPane().setLayout(new javax.swing.BoxLayout(getContentPane(), javax.swing.BoxLayout.PAGE_AXIS));
@@ -181,13 +197,13 @@ public class HoerbertApp extends javax.swing.JFrame {
 
         statusPanel.setMaximumSize(new java.awt.Dimension(32767, 0));
 
-        statusLabel.setText("Hello");
+        statusLabel.setText("Pas de carte SD?");
 
         javax.swing.GroupLayout statusPanelLayout = new javax.swing.GroupLayout(statusPanel);
         statusPanel.setLayout(statusPanelLayout);
         statusPanelLayout.setHorizontalGroup(
             statusPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 0, Short.MAX_VALUE)
+            .addGap(0, 258, Short.MAX_VALUE)
             .addGroup(statusPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addGroup(statusPanelLayout.createSequentialGroup()
                     .addGap(0, 0, Short.MAX_VALUE)
@@ -196,7 +212,7 @@ public class HoerbertApp extends javax.swing.JFrame {
         );
         statusPanelLayout.setVerticalGroup(
             statusPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 0, Short.MAX_VALUE)
+            .addGap(0, 18, Short.MAX_VALUE)
             .addGroup(statusPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addGroup(statusPanelLayout.createSequentialGroup()
                     .addGap(0, 0, Short.MAX_VALUE)
@@ -207,20 +223,28 @@ public class HoerbertApp extends javax.swing.JFrame {
         getContentPane().add(statusPanel);
 
         fileMenu.setMnemonic('f');
-        fileMenu.setText("File");
+        fileMenu.setText("Carte SD");
 
-        saveAsMenuItem.setMnemonic('a');
-        saveAsMenuItem.setText("Save As ...");
-        saveAsMenuItem.setDisplayedMnemonicIndex(5);
-        saveAsMenuItem.addActionListener(new java.awt.event.ActionListener() {
+        selectSDCardMenuItem.setMnemonic('a');
+        selectSDCardMenuItem.setText("Choisir la carte SD");
+        selectSDCardMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                saveAsMenuItemActionPerformed(evt);
+                selectSDCardMenuItemActionPerformed(evt);
             }
         });
-        fileMenu.add(saveAsMenuItem);
+        fileMenu.add(selectSDCardMenuItem);
+
+        writeToSDCardMenuItem.setMnemonic('a');
+        writeToSDCardMenuItem.setText("Ecrire les listes de lecture");
+        writeToSDCardMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                writeToSDCardMenuItemActionPerformed(evt);
+            }
+        });
+        fileMenu.add(writeToSDCardMenuItem);
 
         exitMenuItem.setMnemonic('x');
-        exitMenuItem.setText("Exit");
+        exitMenuItem.setText("Quitter");
         exitMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 exitMenuItemActionPerformed(evt);
@@ -229,15 +253,6 @@ public class HoerbertApp extends javax.swing.JFrame {
         fileMenu.add(exitMenuItem);
 
         menuBar.add(fileMenu);
-
-        helpMenu.setMnemonic('h');
-        helpMenu.setText("Help");
-
-        aboutMenuItem.setMnemonic('a');
-        aboutMenuItem.setText("About");
-        helpMenu.add(aboutMenuItem);
-
-        menuBar.add(helpMenu);
 
         setJMenuBar(menuBar);
 
@@ -284,20 +299,30 @@ public class HoerbertApp extends javax.swing.JFrame {
         System.exit(0);
     }//GEN-LAST:event_exitMenuItemActionPerformed
 
-    private void saveAsMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveAsMenuItemActionPerformed
+    private void writeToSDCardMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_writeToSDCardMenuItemActionPerformed
         File[][] playlists = new File[][] {
-            this.violetPlaylist.getPlaylist(),
-            this.rougePlaylist.getPlaylist(),
-            this.bleuFoncePlaylist.getPlaylist(),
-            this.vertClairPlaylist.getPlaylist(),
-            this.jaunePlaylist.getPlaylist(),
-            this.turquoisePlaylist.getPlaylist(),
-            this.bleuClairPlaylist.getPlaylist(),
-            this.orangePlaylist.getPlaylist(),
-            this.vertFoncePlaylist.getPlaylist()
+            this.violetPlaylist.getPlaylistFiles(),
+            this.rougePlaylist.getPlaylistFiles(),
+            this.bleuFoncePlaylist.getPlaylistFiles(),
+            this.vertClairPlaylist.getPlaylistFiles(),
+            this.jaunePlaylist.getPlaylistFiles(),
+            this.turquoisePlaylist.getPlaylistFiles(),
+            this.bleuClairPlaylist.getPlaylistFiles(),
+            this.orangePlaylist.getPlaylistFiles(),
+            this.vertFoncePlaylist.getPlaylistFiles()
         };
-       HoerbertIO.write(playlists, new File("c:\\tmp\\out"));
-    }//GEN-LAST:event_saveAsMenuItemActionPerformed
+       hoerbertIO.writePlaylist(playlists);
+    }//GEN-LAST:event_writeToSDCardMenuItemActionPerformed
+
+    private void selectSDCardMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectSDCardMenuItemActionPerformed
+        if(this.sdcardFileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+            try {
+                this.hoerbertIO.setSdcard(this.sdcardFileChooser.getSelectedFile().getCanonicalPath());
+            } catch (IOException ex) {
+                Logger.getLogger(HoerbertApp.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }//GEN-LAST:event_selectSDCardMenuItemActionPerformed
 
     public void showInMainPanel(String cardName) {
         CardLayout layout = (CardLayout) this.mainPanel.getLayout();
@@ -343,7 +368,6 @@ public class HoerbertApp extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JMenuItem aboutMenuItem;
     private javax.swing.JButton bleuClairButton;
     private fr.devnewton.hoerbertgui.PlaylistPanel bleuClairPlaylist;
     private javax.swing.JButton bleuFonceButton;
@@ -351,7 +375,7 @@ public class HoerbertApp extends javax.swing.JFrame {
     private javax.swing.JPanel buttonsPanel;
     private javax.swing.JMenuItem exitMenuItem;
     private javax.swing.JMenu fileMenu;
-    private javax.swing.JMenu helpMenu;
+    private fr.devnewton.hoerbertgui.io.HoerbertIO hoerbertIO;
     private javax.swing.JButton jauneButton;
     private fr.devnewton.hoerbertgui.PlaylistPanel jaunePlaylist;
     private javax.swing.JPanel mainPanel;
@@ -360,7 +384,8 @@ public class HoerbertApp extends javax.swing.JFrame {
     private fr.devnewton.hoerbertgui.PlaylistPanel orangePlaylist;
     private javax.swing.JButton rougeButton;
     private fr.devnewton.hoerbertgui.PlaylistPanel rougePlaylist;
-    private javax.swing.JMenuItem saveAsMenuItem;
+    private javax.swing.JFileChooser sdcardFileChooser;
+    private javax.swing.JMenuItem selectSDCardMenuItem;
     private javax.swing.JLabel statusLabel;
     private javax.swing.JPanel statusPanel;
     private javax.swing.JButton turquoiseButton;
@@ -371,6 +396,7 @@ public class HoerbertApp extends javax.swing.JFrame {
     private fr.devnewton.hoerbertgui.PlaylistPanel vertFoncePlaylist;
     private javax.swing.JButton violetButton;
     private fr.devnewton.hoerbertgui.PlaylistPanel violetPlaylist;
+    private javax.swing.JMenuItem writeToSDCardMenuItem;
     // End of variables declaration//GEN-END:variables
 
 }
